@@ -20,6 +20,7 @@ export default function Home() {
   }, []);
 
   const handleAccept = () => {
+    // Add the new transaction to the list
     setTransactions([
       ...transactions,
       {
@@ -28,7 +29,18 @@ export default function Home() {
         date: new Date().toLocaleDateString(),
       },
     ]);
+    
+    // Clear the current payment request
     setPaymentRequest(null);
+    
+    // Attempt to open the iOS app
+    const iosAppUrl = `khanbank://q?qPay_QRCode=${paymentRequest.qrcode}`;
+    window.location.href = iosAppUrl;
+    
+    // Fallback for when the app doesn't open
+    setTimeout(() => {
+      window.location.href = 'https://apps.apple.com/app/khanbank';
+    }, 1000);
   };
 
   return (
