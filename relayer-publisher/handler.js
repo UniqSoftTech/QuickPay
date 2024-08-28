@@ -1,24 +1,24 @@
 const AWS = require('aws-sdk');
 const sns = new AWS.SNS();
 
-const SNS_TOPIC_ARN = process.env.SNS_TOPIC_ARN;
+const SNS_TOPIC_ARN = "invoice-mongolia";
 
 module.exports.publishToRelayers = async (event) => {
   try {
     // Parse the incoming event body
     const body = JSON.parse(event.body);
-    const message = body.message;
+    const qrData = body.qrData;
 
-    if (!message) {
+    if (!qrData) {
       return {
         statusCode: 400,
-        body: JSON.stringify({ error: 'Message is required' }),
+        body: JSON.stringify({ error: 'QR data is required' }),
       };
     }
 
-    // Publish the message to SNS
+    // Publish the QR data to SNS
     const params = {
-      Message: message,
+      Message: JSON.stringify(qrData),
       TopicArn: SNS_TOPIC_ARN,
     };
 
@@ -27,15 +27,15 @@ module.exports.publishToRelayers = async (event) => {
     return {
       statusCode: 200,
       body: JSON.stringify({
-        message: 'Message published successfully',
+        message: 'QR data published successfully',
         messageId: result.MessageId,
       }),
     };
   } catch (error) {
-    console.error('Error publishing message:', error);
+    console.error('Error publishing QR data:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Failed to publish message' }),
+      body: JSON.stringify({ error: 'Failed to publish QR data' }),
     };
   }
 };
