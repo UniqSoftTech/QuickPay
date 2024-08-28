@@ -1,0 +1,29 @@
+service: relayer-publisher
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  environment:
+    SNS_TOPIC_ARN: ${self:custom.snsTopicArn}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sns:Publish
+      Resource: ${self:custom.snsTopicArn}
+
+functions:
+  publishToRelayers:
+    handler: handler.publishToRelayers
+    events:
+      - http:
+          path: publish
+          method: post
+          cors: true
+
+custom:
+  snsTopicArn: arn:aws:sns:${self:provider.region}:471112912931:relayers-topic
+
+plugins:
+  - serverless-offline
