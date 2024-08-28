@@ -21,8 +21,15 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '20.x'
-    - run: npm ci
-    - run: npm test
+    - name: Install dependencies
+      run: |
+        cd relayer-publisher
+        npm install
+        npm ci
+    - name: Run tests
+      run: |
+        cd relayer-publisher
+        npm test
       
   deploy:
     needs: build-and-test
@@ -39,6 +46,8 @@ jobs:
         aws-region: us-east-1
     - name: Deploy to AWS Lambda
       run: |
+        cd relayer-publisher
+        npm install
         npm ci
         npm run build
         serverless deploy
