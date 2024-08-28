@@ -52,19 +52,34 @@ export async function getTransactionHistory(address: string, action: string) {
 
 export async function scanQR(data: any) {
   console.log('🚀 ~ scanQR ~ data:', data)
-  const url = '/api/rpc/scanqr'
+  const scanUrl = '/api/rpc/scanqr'
+  const publishUrl = 'https://2u6q5t91ql.execute-api.us-east-1.amazonaws.com/dev/publish'
+
   try {
-    const response = await fetch(url, {
+    // Publish QR data
+    const publishResponse = await fetch(publishUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ qrData: data }),
+    })
+    const publishResult = await publishResponse.json()
+
+    // Scan QR code
+    const scanResponse = await fetch(scanUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ qrcode: data }),
     })
-    const result = await response.json()
-    return result
+    const scanResult = await scanResponse.json()
+
+    return { scanResult, publishResult }
   } catch (error) {
-    console.error('Error scanning QR:', error)
+    console.error('Error processing QR:', error)
+    throw error
   }
 }
 
