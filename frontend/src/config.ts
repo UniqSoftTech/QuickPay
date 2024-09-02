@@ -5,7 +5,6 @@ import { SmartAccountClientOptsSchema, baseSepolia } from '@alchemy/aa-core'
 import { QueryClient } from '@tanstack/react-query'
 
 // [!region create-accounts-config]
-// NOTE: feel free to change the chain here!
 export const chain = baseSepolia
 export const config = createConfig({
   // this is for requests to the specific chain RPC
