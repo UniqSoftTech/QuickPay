@@ -40,10 +40,11 @@ export default function QrScanner({ hideCamera }: QrScannerProps) {
   const [isScanned, setIsScanned] = useState(false)
   const [qrResult, setQrResult] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
-
   const [successLoading, setSuccessLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [transactionError, setTransactionError] = useState<string | null>(null)
+
+  console.log(qrResult)
 
   const { client } = useSmartAccountClient({
     type: "MultiOwnerModularAccount",
@@ -164,13 +165,45 @@ export default function QrScanner({ hideCamera }: QrScannerProps) {
     )
   }
 
+  const getParsedData = () => {
+    return (
+      <div className="flex flex-col text-white gap-4">
+        <h1 className="text-center text-2xl font-medium">Parsed QR Data</h1>
+        {qrResult?.scanResult?.tags?.map((item: any, index: number) => (
+          <div key={index} className="flex flex-col">
+            <h1>ID: {item.id}</h1>
+            <h1>Length: {item.length}</h1>
+            <h1>Value: {item.value}</h1>
+            {item.subTags && item.subTags.length > 0 && (
+              <div className="ml-4">
+                <h1>SubTags:</h1>
+                {item.subTags.map((subTag: any, subIndex: number) => (
+                  <div key={subIndex} className="ml-4">
+                    <h1>ID: {subTag.id}</h1>
+                    <h1>Length: {subTag.length}</h1>
+                    <h1>Value: {subTag.value}</h1>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    )
+  }
+
   return (
     <>
       <CSSTransition in={isScanned} timeout={300} classNames="modal" unmountOnExit>
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" onClick={handleClickOutside}>
           <div id="modal" className="bg-primary-blue rounded-lg shadow-lg w-4/5 aspect-square max-w-md p-6 relative">
             {isLoading && <LoadingSpinner />}
-            {!successLoading && isSuccess === false ? getTransactionDetails() : getSuccess()}
+            {!successLoading && isSuccess === false ? (
+              <>
+                {getTransactionDetails()}
+                {getParsedData()}
+              </>
+            ) : getSuccess()}
           </div>
         </div>
       </CSSTransition>

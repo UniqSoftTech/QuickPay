@@ -14,6 +14,6 @@ export default function Home() {
   const { isInitializing, isAuthenticating, isConnected, status } = useSignerStatus()
   const isLoading = isInitializing || (isAuthenticating && status !== 'AWAITING_EMAIL_AUTH')
 
-  return <main className="bg-primary-blue flex min-h-screen flex-col items-center justify-center">{isLoading ? <LoadingSpinner /> : isConnected ? <ProfileCard /> : <LogInCard />}</main>
+  return <main className="bg-primary-blue flex min-h-screen flex-col items-center justify-center">{<ProfileCard />}</main>
 }
 // [!endregion using-status]

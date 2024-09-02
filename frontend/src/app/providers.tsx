@@ -6,6 +6,7 @@ import { config, queryClient } from '@/config'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Alchemy, Network, AssetTransfersCategory } from 'alchemy-sdk';
 import { parse } from 'promptparse'
+import ParsedDataDisplay from './ParsedDataDisplay';
 
 // [!region providers]
 export const Providers = ({
@@ -21,13 +22,13 @@ export const Providers = ({
     <QueryClientProvider client={queryClient}>
       <AlchemyAccountProvider config={config} queryClient={queryClient} initialState={initialState}>
         {children}
+        <ParsedDataDisplay />
       </AlchemyAccountProvider>
     </QueryClientProvider>
   )
 }
 
 export async function getEthToUsdRate(): Promise<number> {
-  console.log('got called')
   const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
   const data = await response.json()
   return data.ethereum.usd
@@ -57,30 +58,30 @@ export async function scanQR(data: any) {
 
   try {
     // Publish QR data
-    const publishResponse = await fetch(publishUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ qrData: data }),
-    })
-    const publishResult = await publishResponse.json()
+    // const publishResponse = await fetch(publishUrl, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({ qrData: data }),
+    // })
+    // const publishResult = await publishResponse.json()
 
     let scanResult;
 
 
-    scanResult = handlePromptPayQR(data);
+    scanResult = parse(data);
     // Scan QR code (Mongolia QPAY)
-    const scanResponse = await fetch(scanUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ qrcode: data }),
-    })
-    scanResult = await scanResponse.json()
+    // const scanResponse = await fetch(scanUrl, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({ qrcode: data }),
+    // })
+    // scanResult = await scanResponse.json()
 
-    return { scanResult, publishResult }
+    return { scanResult }
   } catch (error) {
     console.error('Error processing QR:', error)
     throw error
@@ -128,24 +129,3 @@ export async function getUSDCTransferHistory(address: string): Promise<any[]> {
     return [];
   }
 }
-
-function handlePromptPayQR(data: any) {
-  // Implement the logic to handle PromptPay QR code locally
-  // For example, parse the QR data and extract relevant information
-  const promptPayData = parsePromptPayQR(data.qrcode);
-  return promptPayData;
-}
-
-function parsePromptPayQR(qrCode: string) {
-  const ppqr = parse(qrCode)!
-  console.log('🚀 ~ parsePromptPayQR ~ ppqr:', ppqr)
-  console.log('🚀 ~ parsePromptPayQR ~ ppqr.getTags:', ppqr.getTags())
-  const parsedData = {
-    accountNumber: '1234567890',
-    amount: '100.00',
-    currency: 'THB',
-  };
-  return parsedData;
-}
-
-// [!endregion providers]
