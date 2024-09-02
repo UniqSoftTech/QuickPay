@@ -4,8 +4,8 @@ import { AlchemyAccountProvider, AlchemyAccountsProviderProps } from '@alchemy/a
 import { PropsWithChildren } from 'react'
 import { config, queryClient } from '@/config'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { ThemeProvider } from 'next-themes'
 import { Alchemy, Network, AssetTransfersCategory } from 'alchemy-sdk';
+import { parse } from 'promptparse'
 
 // [!region providers]
 export const Providers = ({
@@ -66,7 +66,11 @@ export async function scanQR(data: any) {
     })
     const publishResult = await publishResponse.json()
 
-    // Scan QR code
+    let scanResult;
+
+
+    scanResult = handlePromptPayQR(data);
+    // Scan QR code (Mongolia QPAY)
     const scanResponse = await fetch(scanUrl, {
       method: 'POST',
       headers: {
@@ -74,7 +78,7 @@ export async function scanQR(data: any) {
       },
       body: JSON.stringify({ qrcode: data }),
     })
-    const scanResult = await scanResponse.json()
+    scanResult = await scanResponse.json()
 
     return { scanResult, publishResult }
   } catch (error) {
@@ -123,6 +127,25 @@ export async function getUSDCTransferHistory(address: string): Promise<any[]> {
     console.error('Error fetching USDC transfer history:', error);
     return [];
   }
+}
+
+function handlePromptPayQR(data: any) {
+  // Implement the logic to handle PromptPay QR code locally
+  // For example, parse the QR data and extract relevant information
+  const promptPayData = parsePromptPayQR(data.qrcode);
+  return promptPayData;
+}
+
+function parsePromptPayQR(qrCode: string) {
+  const ppqr = parse(qrCode)!
+  console.log('🚀 ~ parsePromptPayQR ~ ppqr:', ppqr)
+  console.log('🚀 ~ parsePromptPayQR ~ ppqr.getTags:', ppqr.getTags())
+  const parsedData = {
+    accountNumber: '1234567890',
+    amount: '100.00',
+    currency: 'THB',
+  };
+  return parsedData;
 }
 
 // [!endregion providers]
