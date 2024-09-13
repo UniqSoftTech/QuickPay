@@ -6,17 +6,49 @@ import Footer from '../components/Footer';
 import PaymentRequest from '../components/PaymentRequest';
 import PaymentHistory from '../components/PaymentHistory';
 import { getPaymentRequest } from '../lib/paymentRequests';
+import AWS from 'aws-sdk';
 
 export default function Home() {
   const [paymentRequest, setPaymentRequest] = useState(null);
   const [transactions, setTransactions] = useState([]);
 
   useEffect(() => {
-    const fetchPaymentRequest = async () => {
-      const request = await getPaymentRequest();
-      setPaymentRequest(request);
+    // Configure AWS SDK
+    AWS.config.update({
+      region: 'us-east-1',
+      credentials: new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: 'YOUR_IDENTITY_POOL_ID',
+      }),
+    });
+
+    const sns = new AWS.SNS();
+    const subscribeToSNS = async () => {
+      const params = {
+        Protocol: 'https',
+        TopicArn: 'invoice-mongolia',
+        Endpoint: window.location.origin + '/api/sns-endpoint',
+      };
+
+      try {
+        await sns.subscribe(params).promise();
+        console.log('Subscribed to SNS topic');
+      } catch (error) {
+        console.error('Error subscribing to SNS:', error);
+      }
     };
-    fetchPaymentRequest();
+
+    subscribeToSNS();
+
+    // Set up event source for SNS messages
+    const eventSource = new EventSource('/api/sns-messages');
+    eventSource.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      setPaymentRequest(message);
+    };
+
+    return () => {
+      eventSource.close();
+    };
   }, []);
 
   const handleAccept = () => {
