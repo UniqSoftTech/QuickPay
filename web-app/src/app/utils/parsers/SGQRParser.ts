@@ -127,7 +127,7 @@ export class SGQRParser {
 
     const isTemplate = specs[SGQRParser.IS_TEMPLATE] || false;
     if (isTemplate) {
-      specs = { ...specs, ...(this.specs[SGQRParser.TEMPLATES_BY_ID]?.[id] || {}) };
+      specs = { ...specs, ...((this.specs[SGQRParser.TEMPLATES_BY_ID] as Record<string, object>)?.[id] || {}) };
     }
 
     const usesInfoTemplate = specs[SGQRParser.USES_INFO_TEMPLATE] || false;
